@@ -38,7 +38,7 @@ docker run \
 --env organization_id=37ea8d20-7d4d-11f0-9258-9741a6ea35ee \
 --env p0='bm8gdGhhbmtzCg==' \
 --env set_server_url=1
---bw_server_url=https://vault.bitwarden.eu
+--env bw_server_url=https://vault.bitwarden.eu
 -v $(pwd)/config:/root/.config \
 -it ghcr.io/bitwarden-labs/bwconfirm:main
 ```
