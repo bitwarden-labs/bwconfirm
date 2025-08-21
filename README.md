@@ -29,7 +29,7 @@ Select an Admin, Owner, or Custom role with the Manage Users permission. Log in 
 ## Running
 The container is designed to run and exit, not run and stay running in a loop, suitable for cron jobs, Scheduled Tasks, etc. When running on a schedule, it is recommended to attach persistent storage for the `/root/.config/Bitwarden CLI` directory for optimal execution.
 
-Example Docker execution:
+### Docker
 
 ```
 docker run \
@@ -41,4 +41,49 @@ docker run \
 --env bw_server_url=https://vault.bitwarden.eu \
 -v $(pwd)/config:/root/.config \
 -it ghcr.io/bitwarden-labs/bwconfirm:main
+```
+
+### Kubernetes
+
+As long as the `env` data gets into the container as an environment variable, you may use any method to provide these variables - `env` is used for illustrative purposes.
+
+```
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: bwconfirm
+  namespace: bitwarden
+spec:
+  schedule: '@hourly'
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: bwconfirm
+              image: ghcr.io/bitwarden-labs/bwconfirm:main
+              command:
+              - "/bin/bash"
+              args:
+              - ["c", "/bwConfirm.sh"]
+              env:
+              - name: BW_CLIENTID
+                value: "user.84a9f5f5-0b27-488c-92a3-ad8300fdca1b"
+              - name: BW_CLIENTSECRET
+                value: "rOsmh8Lx7PwG0AOEGQWyFJudXfaCUE"
+              - name: organization_id
+                value: "4374263a-ba1a-4d69-a8d3-ad550120f215"
+              - name: p0
+                value: "S0t6aFBlTDRvTURhWFYK"
+              - name: BITWARDENCLI_APPDATA_DIR
+                value: "/var/tmp/"
+              volumeMounts:
+              - mountPath: /var/tmp
+                name: bwconfirm-config
+          volumes:
+          - name: bwconfirm-config
+            emptyDir:
+              sizeLimit: 100Mi
+          restartPolicy: OnFailure
 ```
